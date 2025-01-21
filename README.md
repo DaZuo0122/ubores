@@ -1,2 +1,3 @@
 # ubores
-A Reliable UDP Tunneling Tool Written in Rust
+## WIP (work in process)  
+Please checkout `dev` branch if you want to contribute.
