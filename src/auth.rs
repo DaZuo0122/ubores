@@ -1,4 +1,4 @@
-use aead::{Aead, KeyInit, OsRng, Nonce};
+use aead::{Aead, KeyInit};
 use aes_gcm::{Aes128Gcm, Key as AesKey, Nonce as AesNonce};
 use chacha20poly1305::{ChaCha20Poly1305, Key as ChaChaKey, Nonce as ChaChaNonce};
 use uuid::Uuid;
@@ -9,6 +9,7 @@ use anyhow::{Result, Error};
 pub const CONTROL_PORT: u16 = 7835;
 pub const SAFE_MAX_SIZE: usize = 512;
 
+#[derive(Copy, Clone)]
 pub enum EncryptMethod {
     UNSAFE = 0,
     AES = 1,
@@ -33,6 +34,14 @@ impl EncryptMethod {
             1 => EncryptMethod::AES,
             2 => EncryptMethod::CHACHA,
             0 | _ => EncryptMethod::UNSAFE,
+        }
+    }
+
+    pub fn to_num(&self) -> u8 {
+        match self {
+            EncryptMethod::UNSAFE => 0,
+            EncryptMethod::AES => 1,
+            EncryptMethod::CHACHA => 2,
         }
     }
 }

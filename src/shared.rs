@@ -1,4 +1,5 @@
 use anyhow::{Result, Error};
+use rand;
 
 pub const CONTROL_PORT: u16 = 7835;
 pub const SAFE_MAX_SIZE: usize = 512;
@@ -125,6 +126,31 @@ impl BytePacketBuffer {
         } else {
             Err(Error::msg("Fail to read data, Header have not finished reading yet"))
         }
+    }
+
+    pub fn write(&mut self, data: &[u8]) -> Result<()> {
+        let end = self.pos + data.len();
+        if end >= 512 {
+            return Err(Error::msg("Fail to write buffer, already full"))
+        } else {
+            self.buf[self.pos.. end].copy_from_slice(data);
+            self.pos = end;
+            Ok(())
+        }
+    }
+
+    pub fn write_and_fill(&mut self, data: &[u8]) -> Result<()> {
+        self.write(data)?;
+        if self.pos >= 512 {
+            return Err(Error::msg("Fail to add padding to already full buffer"))
+        } else {
+            // fill the rest of self.buf with random bytes
+            let remaining = 512 - self.pos;
+            let random_bytes: Vec<u8> = (0..remaining).map(|_| rand::random()).collect();
+            self.buf[self.pos..512].copy_from_slice(&random_bytes);
+            self.pos = 512;
+        }
+        Ok(())
     }
 
 }
